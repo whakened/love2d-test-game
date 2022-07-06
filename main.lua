@@ -10,7 +10,8 @@ function love.load()
     helvetica_button = love.graphics.newFont("helvetica.ttf", 50)
     scene = "title"
     nodes={}
-    for i=0,100,1 do
+    nodesToGenerate=100
+    for i=0,nodesToGenerate,1 do
         table.insert(nodes, {love.math.random(50,1150),love.math.random(50,600),love.math.random(1,4)})
     end
     rgbDirection = 1
@@ -23,44 +24,72 @@ function love.load()
     backgroundR=255
     backgroundG=0
     backgroundB=0
+    hoveringExit = false
+    hoveringOptions = false
+    hoveringBegin = false
+    hoverShades = {255,255,255}
 end
 
 function love.update(dt)
-    if rgbDirection==1 then
-        if backgroundG==255 then
-            rgbDirection=2
-        else
-            backgroundG=backgroundG+1
+    if scene=="title" then
+        nodes[nodesToGenerate+1]={love.mouse.getX(),love.mouse.getY(),5}
+        if rgbDirection==1 then
+            if backgroundG==255 then
+                rgbDirection=2
+            else
+                backgroundG=backgroundG+1
+            end
+        elseif rgbDirection==2 then
+            if backgroundR==0 then
+                rgbDirection=3
+            else
+                backgroundR=backgroundR-1
+            end
+        elseif rgbDirection==3 then
+            if backgroundB==255 then
+                rgbDirection=4
+            else
+                backgroundB=backgroundB+1
+            end
+        elseif rgbDirection==4 then
+            if backgroundG==0 then
+                rgbDirection=5
+            else
+                backgroundG=backgroundG-1
+            end
+        elseif rgbDirection==5 then
+            if backgroundR==255 then
+                rgbDirection=6
+            else
+                backgroundR=backgroundR+1
+            end
+        elseif rgbDirection==6 then
+            if backgroundB==0 then
+                rgbDirection=1
+            else
+                backgroundB=backgroundB-1
+            end
         end
-    elseif rgbDirection==2 then
-        if backgroundR==0 then
-            rgbDirection=3
+        if love.mouse.getX()>=548 and love.mouse.getY()>=552 and love.mouse.getX()<=654 and love.mouse.getY()<=589 then
+            hoveringExit=true
+            if hoverShades[3]~=0 then hoverShades[3]=hoverShades[3]-15 end
         else
-            backgroundR=backgroundR-1
+            hoveringExit=false
+            if hoverShades[3]~=255 then hoverShades[3]=hoverShades[3]+15 end
         end
-    elseif rgbDirection==3 then
-        if backgroundB==255 then
-            rgbDirection=4
+        if love.mouse.getX()>=488 and love.mouse.getY()>=477 and love.mouse.getX()<=710 and love.mouse.getY()<=515 then
+            hoveringOptions=true
+            if hoverShades[2]~=0 then hoverShades[2]=hoverShades[2]-15 end
         else
-            backgroundB=backgroundB+1
+            hoveringOptions=false
+            if hoverShades[2]~=255 then hoverShades[2]=hoverShades[2]+15 end
         end
-    elseif rgbDirection==4 then
-        if backgroundG==0 then
-            rgbDirection=5
+        if love.mouse.getX()>=525 and love.mouse.getY()>=402 and love.mouse.getX()<=673 and love.mouse.getY()<=439 then
+            hoveringBegin=true
+            if hoverShades[1]~=0 then hoverShades[1]=hoverShades[1]-15 end
         else
-            backgroundG=backgroundG-1
-        end
-    elseif rgbDirection==5 then
-        if backgroundR==255 then
-            rgbDirection=6
-        else
-            backgroundR=backgroundR+1
-        end
-    elseif rgbDirection==6 then
-        if backgroundB==0 then
-            rgbDirection=1
-        else
-            backgroundB=backgroundB-1
+            hoveringBegin=false
+            if hoverShades[1]~=255 then hoverShades[1]=hoverShades[1]+15 end
         end
     end
 end
@@ -81,7 +110,9 @@ function love.draw()
             end
         end
         for _, i in ipairs(nodes) do
-            love.graphics.circle("fill", i[1], i[2], 5)
+            if i[3]~=5 then
+                love.graphics.circle("fill", i[1], i[2], 5)
+            end
             -- i[3] 1 UL 2 UR 3 DR 4 DL
             if i[1]<3 and i[3]==1 then i[3]=2 elseif i[1]<3 and i[3]==4 then i[3]=3
             elseif i[1]>1197 and i[3]==2 then i[3]=1 elseif i[1]>1197 and i[3]==3 then i[3]=4
@@ -106,11 +137,20 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
         love.graphics.rectangle("fill", love.mouse.getX(), 0, 1, 650)
         love.graphics.rectangle("fill", 0, love.mouse.getY(), 1200, 1)
+        love.graphics.setColor(1,1,1,0.25)
+        love.graphics.rectangle("fill", 100, 125, 1000, 175, 25, 25)
+        love.graphics.rectangle("fill", 500, 390, 200, 65, 15, 15)
+        love.graphics.rectangle("fill", 470, 465, 260, 65, 15, 15)
+        love.graphics.rectangle("fill", 525, 540, 150, 65, 15, 15)
+        love.graphics.setColor(1, 1, 1)
         love.graphics.setFont(helvetica_title)
         love.graphics.printf("tthe video game", 0, 150, 1200, "center")
         love.graphics.setFont(helvetica_button)
+        love.graphics.setColor(1,hoverShades[1]/255,hoverShades[1]/255)
         love.graphics.printf("BEGIN", 0, 400, 1200, "center")
+        love.graphics.setColor(1,hoverShades[2]/255,hoverShades[2]/255)
         love.graphics.printf("OPTIONS", 0, 475, 1200, "center")
+        love.graphics.setColor(1,hoverShades[3]/255,hoverShades[3]/255)
         love.graphics.printf("EXIT", 0, 550, 1200, "center")
         if drawSelectionBox then
             love.graphics.setColor(0.5, 0.75, 1, 1)
