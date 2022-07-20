@@ -35,10 +35,20 @@ function love.load()
     useFancyBackground=true
     hoveringBrightness=false
     brightness=0
+    showMouse=true
+    showCrossSection=false
+    showMouseCircle=false
+    showSelectionBox=false
+    hoveringShowMouse=false
+    hoveringCrossSection=false
+    hoveringMouseCircle=false
+    hoveringSelectionBox=false
+    transitionFade=0
+	button_click = love.audio.newSource("sounds/button_click.wav", "static")
 end
 
 function love.update(dt)
-    if scene~="game" then
+    if scene~="game" and scene~="transition" then
         if rgbDirection==1 then
             if backgroundG==255 then
                 rgbDirection=2
@@ -125,7 +135,7 @@ function love.update(dt)
             hoveringBack=true
             if hoverShades[7]~=0 then hoverShades[7]=hoverShades[7]-15 end
         else
-            hoveringExit=false
+            hoveringBack=false
             if hoverShades[7]~=255 then hoverShades[7]=hoverShades[7]+15 end
         end
         if scene=="options-display" then
@@ -139,6 +149,32 @@ function love.update(dt)
             else
                 hoveringBrightness=false
             end
+        elseif scene=="options-mouse" then
+            if love.mouse.getX()>=390 and love.mouse.getY()>=202 and love.mouse.getX()<=809 and love.mouse.getY()<=240 then
+                hoveringShowMouse=true
+            else
+                hoveringShowMouse=false
+            end
+            if love.mouse.getX()>=379 and love.mouse.getY()>=277 and love.mouse.getX()<=821 and love.mouse.getY()<=315 then
+                hoveringCrossSection=true
+            else
+                hoveringCrossSection=false
+            end
+            if love.mouse.getX()>=389 and love.mouse.getY()>=352 and love.mouse.getX()<=811 and love.mouse.getY()<=389 then
+                hoveringMouseCircle=true
+            else
+                hoveringMouseCircle=false
+            end
+            if love.mouse.getX()>=381 and love.mouse.getY()>=427 and love.mouse.getX()<=818 and love.mouse.getY()<=464 then
+                hoveringSelectionBox=true
+            else
+                hoveringSelectionBox=false
+            end
+        end
+    elseif scene=="transition" then
+        transitionFade=transitionFade+1
+        if transitionFade>=255 then
+            scene="game"
         end
     end
 end
@@ -186,9 +222,6 @@ function love.draw()
         end
     end
     if scene=="title" then
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("fill", love.mouse.getX(), 0, 1, 650)
-        love.graphics.rectangle("fill", 0, love.mouse.getY(), 1200, 1)
         love.graphics.setColor(1,1,1,0.25)
         love.graphics.rectangle("fill", 100, 125, 1000, 175, 25, 25)
         love.graphics.rectangle("fill", 500, 390, 200, 65, 15, 15)
@@ -204,19 +237,6 @@ function love.draw()
         love.graphics.printf("OPTIONS", 0, 475, 1200, "center")
         love.graphics.setColor(1,hoverShades[3]/255,hoverShades[3]/255)
         love.graphics.printf("EXIT", 0, 550, 1200, "center")
-        if drawSelectionBox then
-            love.graphics.setColor(0.5, 0.75, 1, 1)
-            love.graphics.rectangle("line", mouseOriginalX, mouseOriginalY, love.mouse.getX()-mouseOriginalX, love.mouse.getY()-mouseOriginalY)
-            love.graphics.setColor(0.5, 0.75, 1, 0.3)
-            love.graphics.rectangle("fill", mouseOriginalX, mouseOriginalY, love.mouse.getX()-mouseOriginalX, love.mouse.getY()-mouseOriginalY)
-            love.graphics.setColor(0, 0, 0, 1)
-            love.graphics.setNewFont(12)
-            love.graphics.print(mouseOriginalX ..", ".. mouseOriginalY, mouseOriginalX+1, mouseOriginalY+1)
-            love.graphics.print(love.mouse.getX() ..", ".. love.mouse.getY(), love.mouse.getX()+1, love.mouse.getY()+1)
-            love.graphics.setColor(1, 1, 1, 1)
-            love.graphics.print(mouseOriginalX ..", ".. mouseOriginalY, mouseOriginalX, mouseOriginalY)
-            love.graphics.print(love.mouse.getX() ..", ".. love.mouse.getY(), love.mouse.getX(), love.mouse.getY())
-        end
     end
     if scene=="options-display" then
         love.graphics.setFont(helvetica_button)
@@ -231,6 +251,38 @@ function love.draw()
         love.graphics.printf("Fancy Background: ".. tostring(useFancyBackground), 0, 200, 1200, "center")
         love.graphics.setColor(1,1,1)
         love.graphics.printf("Brightness: ".. tostring(brightness*2), 0, 275, 1200, "center")
+    end
+    if scene=="options-mouse" then
+        love.graphics.setFont(helvetica_button)
+        love.graphics.setColor(1,1,1,0.25)
+        love.graphics.rectangle("fill", 380, 190, 440, 65, 15, 15)
+        love.graphics.rectangle("fill", 365, 265, 470, 65, 15, 15)
+        love.graphics.rectangle("fill", 375, 340, 450, 65, 15, 15)
+        love.graphics.rectangle("fill", 370, 415, 460, 65, 15, 15)
+        if showMouse then
+            love.graphics.setColor(0,1,0)
+        else
+            love.graphics.setColor(1,0,0)
+        end
+        love.graphics.printf("Show Mouse: ".. tostring(showMouse), 0, 200, 1200, "center")
+        if showCrossSection then
+            love.graphics.setColor(0,1,0)
+        else
+            love.graphics.setColor(1,0,0)
+        end
+        love.graphics.printf("Cross Section: ".. tostring(showCrossSection), 0, 275, 1200, "center")
+        if showMouseCircle then
+            love.graphics.setColor(0,1,0)
+        else
+            love.graphics.setColor(1,0,0)
+        end
+        love.graphics.printf("Mouse Circle: ".. tostring(showMouseCircle), 0, 350, 1200, "center")
+        if showSelectionBox then
+            love.graphics.setColor(0,1,0)
+        else
+            love.graphics.setColor(1,0,0)
+        end
+        love.graphics.printf("Selection Box: ".. tostring(showSelectionBox), 0, 425, 1200, "center")
     end
     if string.sub(scene,1,7)=="options" then
         love.graphics.setColor(1,1,1,0.25)
@@ -247,24 +299,48 @@ function love.draw()
         love.graphics.printf("Back",0,550,1200,"center")
         love.graphics.setColor(1, 1, 1)
         love.graphics.printf("   |  |   ", 0, 50, 1200, "justify")
-        --love.graphics.print("|",371,50)
-        --love.graphics.print("|",749,50)
+    end
+    if scene=="transition" then
+        love.graphics.setColor(1,1,1,0.25)
+        love.graphics.rectangle("fill", 100, 125, 1000, 175, 25, 25)
+        love.graphics.rectangle("fill", 500, 390, 200, 65, 15, 15)
+        love.graphics.rectangle("fill", 470, 465, 260, 65, 15, 15)
+        love.graphics.rectangle("fill", 525, 540, 150, 65, 15, 15)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setFont(helvetica_title)
+        love.graphics.printf("tthe video game", 0, 150, 1200, "center")
+        love.graphics.setFont(helvetica_button)
+        love.graphics.setColor(1,hoverShades[1]/255,hoverShades[1]/255)
+        love.graphics.printf("BEGIN", 0, 400, 1200, "center")
+        love.graphics.setColor(1,hoverShades[2]/255,hoverShades[2]/255)
+        love.graphics.printf("OPTIONS", 0, 475, 1200, "center")
+        love.graphics.setColor(1,hoverShades[3]/255,hoverShades[3]/255)
+        love.graphics.printf("EXIT", 0, 550, 1200, "center")
+        love.graphics.setColor(0,0,0,transitionFade/255)
+        love.graphics.rectangle("fill", 0, 0, 1200, 650)
+    end
+    if showSelectionBox and drawSelectionBox then
+        love.graphics.setColor(0.5, 0.75, 1, 1)
+        love.graphics.rectangle("line", mouseOriginalX, mouseOriginalY, love.mouse.getX()-mouseOriginalX, love.mouse.getY()-mouseOriginalY)
+        love.graphics.setColor(0.5, 0.75, 1, 0.3)
+        love.graphics.rectangle("fill", mouseOriginalX, mouseOriginalY, love.mouse.getX()-mouseOriginalX, love.mouse.getY()-mouseOriginalY)
+        love.graphics.setColor(0, 0, 0, 1)
+        love.graphics.setNewFont(12)
+        love.graphics.print(mouseOriginalX ..", ".. mouseOriginalY, mouseOriginalX+1, mouseOriginalY+1)
+        love.graphics.print(love.mouse.getX() ..", ".. love.mouse.getY(), love.mouse.getX()+1, love.mouse.getY()+1)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.print(mouseOriginalX ..", ".. mouseOriginalY, mouseOriginalX, mouseOriginalY)
+        love.graphics.print(love.mouse.getX() ..", ".. love.mouse.getY(), love.mouse.getX(), love.mouse.getY())
+    end
+    love.graphics.setColor(1, 1, 1)
+    if showCrossSection then
         love.graphics.rectangle("fill", love.mouse.getX(), 0, 1, 650)
         love.graphics.rectangle("fill", 0, love.mouse.getY(), 1200, 1)
-        if drawSelectionBox then
-            love.graphics.setColor(0.5, 0.75, 1, 1)
-            love.graphics.rectangle("line", mouseOriginalX, mouseOriginalY, love.mouse.getX()-mouseOriginalX, love.mouse.getY()-mouseOriginalY)
-            love.graphics.setColor(0.5, 0.75, 1, 0.3)
-            love.graphics.rectangle("fill", mouseOriginalX, mouseOriginalY, love.mouse.getX()-mouseOriginalX, love.mouse.getY()-mouseOriginalY)
-            love.graphics.setColor(0, 0, 0, 1)
-            love.graphics.setNewFont(12)
-            love.graphics.print(mouseOriginalX ..", ".. mouseOriginalY, mouseOriginalX+1, mouseOriginalY+1)
-            love.graphics.print(love.mouse.getX() ..", ".. love.mouse.getY(), love.mouse.getX()+1, love.mouse.getY()+1)
-            love.graphics.setColor(1, 1, 1, 1)
-            love.graphics.print(mouseOriginalX ..", ".. mouseOriginalY, mouseOriginalX, mouseOriginalY)
-            love.graphics.print(love.mouse.getX() ..", ".. love.mouse.getY(), love.mouse.getX(), love.mouse.getY())
-        end
     end
+    if showMouseCircle then
+        love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), 20)
+    end
+    love.mouse.setVisible(showMouse)
     if brightness<0 then
         love.graphics.setColor(0,0,0,math.abs(brightness/10))
     else
@@ -275,6 +351,8 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button, isTouch)
+    love.audio.stop(button_click)
+    love.audio.play(button_click)
     if hoveringExit then
         os.exit()
     elseif hoveringOptions then
@@ -298,8 +376,21 @@ function love.mousepressed(x, y, button, isTouch)
                 brightness=brightness-0.5
             end
         end
+    elseif hoveringShowMouse then
+        showMouse=not showMouse
+    elseif hoveringCrossSection then
+        showCrossSection=not showCrossSection
+    elseif hoveringMouseCircle then
+        showMouseCircle=not showMouseCircle
+    elseif hoveringSelectionBox then
+        showSelectionBox=not showSelectionBox
     elseif hoveringBack then
         scene="title"
+        hoveringBack=false
+    elseif hoveringBegin then
+        scene="transition"
+    else
+        love.audio.stop(button_click)
     end
     drawSelectionBox = true
     mouseOriginalX = x
