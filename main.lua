@@ -32,7 +32,7 @@ function love.load()
     hoveringGame = false
     hoveringBack = false
     hoverShades = {255,255,255,255,255,255,255}
-    useFancyBackground=true
+    useFancyBackground=false
     hoveringBrightness=false
     brightness=0
     showMouse=true
